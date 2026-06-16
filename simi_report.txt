@@ -1,0 +1,11 @@
+
+======= Report (None to None) =======
+  Income  : 400000.00
+  Expense : 3740.00
+  Balance : 396260.00
+
+------- Purchase Details -------
+  2026-06-16 | Food       | mango           | 900.0
+  2026-04-12 | Shopping   | dress           | 2000.0
+  2026-05-23 | Health     | medicine        | 800.0
+  2025-09-23 | Food       | water           | 40.0

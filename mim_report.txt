@@ -1,0 +1,9 @@
+
+======= Report (None to None) =======
+  Income  : 20000.00
+  Expense : 1360.00
+  Balance : 18640.00
+
+------- Purchase Details -------
+  2026-06-16 | Food       | cake            | 360.0
+  2026-06-16 | Shopping   | dress           | 1000.0
