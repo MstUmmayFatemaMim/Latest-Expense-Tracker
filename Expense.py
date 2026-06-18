@@ -1,3 +1,5 @@
+from ftplib import all_errors
+
 from Config import AllConnection
 
 
@@ -49,62 +51,51 @@ class Expense:
         cls(user_id, "Health", product, quantity, price)
 
     @classmethod
-    def _show_and_select(cls, user_id, action):
+    def show_selected_expense(cls, user_id):
         all_data = AllConnection.read_data(AllConnection.Expense_File_Path)
-        serial_map = {}
+        user_expense = []
+        index = 0
+        for row in all_data:
+            if row["user_id"] == user_id and row["income"] == "":
+                user_expense.append(row)
+                print(f"{index}. {row['product']}    {row['total_price']}   {row['date']}")
+                index = index + 1
 
-        print(f"\n--- Select Expense to {action} ---")
-        serial = 1
-        for i, row in enumerate(all_data):
-            if row.get("user_id") == user_id and row.get("total_price"):
-                serial_map[serial] = i
-                print(f"{serial}. {row['date']} | {row['product']} | {row['total_price']}")
-                serial += 1
-
-        if serial == 1:
-            print("No expenses found!")
-            return None, None, None
-
-        choice = int(input("\nEnter number: "))
-        return all_data, choice, serial_map
+        choice = int(input("Select the index number: "))
+        selected_row = user_expense[choice]
+        return selected_row, all_data
 
     @classmethod
     def edit_expense(cls, user_id):
-        all_data, choice, serial_map = cls._show_and_select(user_id, "Edit")
-        if all_data is None:
-            return
+        selected_row, all_data = cls.show_selected_expense(user_id)
+        new_product = input("Enter the new product name: ")
+        new_quantity = input("Enter the new quantity: ")
+        new_price = input("Enter the new price: ")
 
-        index = serial_map[choice]
-        row = all_data[index]
+        if new_product != "":
+            selected_row["product"] = new_product
+        if new_quantity != "":
+            selected_row["quantity"] = new_quantity
+        if new_price != "":
+            selected_row["price"] = new_price
 
-        row['product'] = input("New product: ") or row['product']
-        row['quantity'] = input("New quantity: ") or row['quantity']
-        row['price'] = input("New price: ") or row['price']
-        row['total_price'] = float(row['quantity']) * float(row['price'])
-        row['date'] = AllConnection.get_manual_date()
+        selected_row["total_price"] = float(selected_row["price"]) * float(selected_row["quantity"])
+        selected_row["date"] = AllConnection.get_manual_date()
 
-        open(AllConnection.Expense_File_Path, "w").close()
+        open(AllConnection.Expense_File_Path, "w", encoding="utf-8").close()
+
         for row in all_data:
-            AllConnection.write_and_save_data(
-                AllConnection.Expense_File_Path,
-                AllConnection.Expense_Column, row)
-        print("Updated successfully!")
+            AllConnection.write_and_save_data(AllConnection.Expense_File_Path, AllConnection.Expense_Column, row)
+        print("Updated successfully")
 
     @classmethod
     def delete_expense(cls, user_id):
-        all_data, choice, serial_map = cls._show_and_select(user_id, "Delete")
-        if all_data is None:
-            return
-
-        index = serial_map[choice]
-        all_data.pop(index)
-
-        open(AllConnection.Expense_File_Path, "w").close()
+        selected_row, all_data = cls.show_selected_expense(user_id)
+        open(AllConnection.Expense_File_Path, "w", encoding="utf-8").close()
         for row in all_data:
-            AllConnection.write_and_save_data(
-                AllConnection.Expense_File_Path,
-                AllConnection.Expense_Column, row)
-        print("Deleted successfully!")
+            if row != selected_row:
+                AllConnection.write_and_save_data(AllConnection.Expense_File_Path, AllConnection.Expense_Column, row)
+        print("Deleted successfully")
 
     @classmethod
     def expense(cls, user_id):

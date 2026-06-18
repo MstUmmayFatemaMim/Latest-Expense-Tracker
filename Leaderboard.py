@@ -1,35 +1,38 @@
+import csv
 from Config import AllConnection
 
 
 class LeaderBoard:
 
-    def process_and_print_leaderboard(self, user_amounts, title):
-        all_users = AllConnection.read_data(AllConnection.User_File_Path)
-        id_to_name_map = {}
-        for user in all_users:
-            id_to_name_map[user["user_id"]] = user["user_name"]
+    def get_user_map(self):
+        user_map = {}
+        user_rows = AllConnection.read_data(AllConnection.User_File_Path)
+        for row in user_rows:
+            user_map[row["user_id"]] = row["user_name"]
+        return user_map
 
+    def display_ranking(self, title, user_data):
         ranking_list = []
-        for user_id, total in user_amounts.items():
-            actual_name = id_to_name_map.get(user_id, user_id)
-            ranking_list.append([total, actual_name])
+        for name, total in user_data.items():
+            ranking_list.append([total, name])
 
         ranking_list.sort(reverse=True)
 
-        print(f"\nRank  Username       Total {title}")
-        print("-" * 35)
+        print(f"\nRank  Username       {title}")
+        print("-" * 33)
         rank = 1
         for total, name in ranking_list[:3]:
-            print(f"{rank:<5} {name:<14} {total:.2f}")
+            print(f"{rank:<5} {name:<14} {total}")
             rank = rank + 1
 
     def view_by_income(self):
+        user_map = self.get_user_map()
         user_incomes = {}
-        all_data = AllConnection.read_data(AllConnection.Expense_File_Path)
 
-        for row in all_data:
-            if row.get("user_id") and row.get("income"):
-                name = row["user_id"]
+        expense_rows = AllConnection.read_data(AllConnection.Expense_File_Path)
+        for row in expense_rows:
+            if row["user_id"] != "" and row["income"] != "":
+                name = user_map.get(row["user_id"], "Unknown")
                 amount = float(row["income"])
 
                 if name in user_incomes:
@@ -37,15 +40,16 @@ class LeaderBoard:
                 else:
                     user_incomes[name] = amount
 
-        self.process_and_print_leaderboard(user_incomes, "Income")
+        self.display_ranking("Total Income", user_incomes)
 
     def view_by_expense(self):
+        user_map = self.get_user_map()
         user_expenses = {}
-        all_data = AllConnection.read_data(AllConnection.Expense_File_Path)
 
-        for row in all_data:
-            if row.get("user_id") and row.get("total_price"):
-                name = row["user_id"]
+        expense_rows = AllConnection.read_data(AllConnection.Expense_File_Path)
+        for row in expense_rows:
+            if row["user_id"] != "" and row["total_price"] != "" and row["income"] == "":
+                name = user_map.get(row["user_id"], "Unknown")
                 amount = float(row["total_price"])
 
                 if name in user_expenses:
@@ -53,52 +57,34 @@ class LeaderBoard:
                 else:
                     user_expenses[name] = amount
 
-        self.process_and_print_leaderboard(user_expenses, "Expense")
+        self.display_ranking("Total Expense", user_expenses)
 
     def view_by_balance(self):
+        user_map = self.get_user_map()
         user_balances = {}
-        all_data = AllConnection.read_data(AllConnection.Expense_File_Path)
 
-        for row in all_data:
-            if row.get("user_id"):
-                name = row["user_id"]
+        expense_rows = AllConnection.read_data(AllConnection.Expense_File_Path)
+        for row in expense_rows:
+            if row["user_id"] != "":
+                name = user_map.get(row["user_id"], "Unknown")
 
                 if name not in user_balances:
                     user_balances[name] = 0.0
 
-                if row.get("income"):
+                if row["income"] != "":
                     user_balances[name] = user_balances[name] + float(row["income"])
-                if row.get("total_price"):
+                if row["total_price"] != "" and row["income"] == "":
                     user_balances[name] = user_balances[name] - float(row["total_price"])
 
-        self.process_and_print_leaderboard(user_balances, "Balance")
-
-    def view_by_category(self):
-        user_categories = {}
-        cat = input("Enter category to compare (Food/Shopping/Health): ").strip()
-        all_data = AllConnection.read_data(AllConnection.Expense_File_Path)
-
-        for row in all_data:
-            if row.get("user_id") and row.get("category") == cat and row.get("total_price"):
-                name = row["user_id"]
-                amount = float(row["total_price"])
-
-                if name in user_categories:
-                    user_categories[name] = user_categories[name] + amount
-                else:
-                    user_categories[name] = amount
-
-        self.process_and_print_leaderboard(user_categories, f"Expense ({cat})")
+        self.display_ranking("Total Balance", user_balances)
 
     def show_leaderboard(self):
         while True:
-            print(f"\n===== LEADERBOARD =====")
+            print("\n===== LEADERBOARD =====")
             print("1. View by Income")
             print("2. View by Expense")
             print("3. View by Balance")
-            print("4. View by Category")
-            print("5. Show all ranking")
-            print("6. Go Back")
+            print("4. Go Back")
 
             choice = input("\nChoose: ").strip()
 
@@ -109,14 +95,7 @@ class LeaderBoard:
             elif choice == "3":
                 self.view_by_balance()
             elif choice == "4":
-                self.view_by_category()
-            elif choice == "5":
-                print("\n===================     GENERATING ALL LEADERBOARDS    ===================")
-                self.view_by_income()
-                self.view_by_expense()
-                self.view_by_balance()
-            elif choice == "6":
-                print("Going back.")
+                print("Going back.");
                 break
             else:
                 print("Invalid choice.")
