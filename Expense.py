@@ -53,11 +53,11 @@ class Expense:
     @classmethod
     def show_selected_expense(cls, user_id):
         all_data = AllConnection.read_data(AllConnection.Expense_File_Path)
-        user_expense = []
+        user_expense = {}
         index = 0
         for row in all_data:
             if row["user_id"] == user_id and row["income"] == "":
-                user_expense.append(row)
+                user_expense[index] = row
                 print(f"{index}. {row['product']}    {row['total_price']}   {row['date']}")
                 index = index + 1
 

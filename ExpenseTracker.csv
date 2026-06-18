@@ -20,6 +20,5 @@ user_id,income,category,product,quantity,price,total_price,date
 4,20000,,,,,,4/19/2026
 4,,Food,mango,20,300,6000,6/16/2026
 1,200000,,,,,,6/23/2025
-1,,Food,Chocolate,1.0,500.0,500.0,2026-06-18
-1,,Health,medicine,1.0,1000.0,1000.0,2026-05-12
+1,,Health,medicine,1.0,1500,1500.0,2026-04-13
 1,,Health,test,2.0,1000,2000.0,2026-06-18
